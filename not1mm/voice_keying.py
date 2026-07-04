@@ -73,7 +73,7 @@ class Voice(QObject):
                         if self.nonblocking > 0:
                             sd.wait()
                         # https://snyk.io/advisor/python/sounddevice/functions/sounddevice.PortAudioError
-                    except (sd.PortAudioError, ValueError) as err:
+                    except sd.PortAudioError as err:
                         logger.warning("%s", f"{err}")
             try:
                 while sd.get_stream().active:

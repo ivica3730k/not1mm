@@ -266,6 +266,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCorner(Qt.Corner.BottomLeftCorner, Qt.DockWidgetArea.LeftDockWidgetArea)
         self.fontfamily = self.load_fonts_from_dir(os.fspath(fsutils.APP_DATA_PATH))
         uic.loadUi(fsutils.APP_DATA_PATH / "main.ui", self)
+        self.function_keys = (
+            self.F1,
+            self.F2,
+            self.F3,
+            self.F4,
+            self.F5,
+            self.F6,
+            self.F7,
+            self.F8,
+            self.F9,
+            self.F10,
+            self.F11,
+            self.F12,
+        )
         self.tray_icon = None
         if not QSystemTrayIcon.isSystemTrayAvailable():
             print("System tray not available for this system")
@@ -746,20 +760,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.readpreferences()
 
         self.show_splash_msg("Starting voice thread.")
-        self.function_keys = (
-            self.F1,
-            self.F2,
-            self.F3,
-            self.F4,
-            self.F5,
-            self.F6,
-            self.F7,
-            self.F8,
-            self.F9,
-            self.F10,
-            self.F11,
-            self.F12,
-        )
         self.voice_process = Voice()
         self.voice_process.moveToThread(self.voice_thread)
         self.voice_thread.started.connect(self.voice_process.run)
