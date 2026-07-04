@@ -24,6 +24,17 @@ from PyQt6.QtCore import QObject, QThread, pyqtSignal
 logger = logging.getLogger("voice_keying")
 
 
+def has_output_device(sounddevice_name="default") -> bool:
+    """Return True when the selected output audio device is available."""
+    if sd is None:
+        return False
+    try:
+        sd.check_output_settings(device=sounddevice_name)
+    except (sd.PortAudioError, ValueError, TypeError):
+        return False
+    return True
+
+
 class Voice(QObject):
     """Voice class"""
 
@@ -43,6 +54,10 @@ class Voice(QObject):
         while True:
             keyed = False
             while len(self.voicings):
+                if not has_output_device(self.sounddevice):
+                    logger.warning("No available output sound device for voice keying.")
+                    self.voicings.clear()
+                    break
                 if not keyed:
                     self.ptt_on.emit()
                     keyed = True
@@ -58,7 +73,7 @@ class Voice(QObject):
                         if self.nonblocking > 0:
                             sd.wait()
                         # https://snyk.io/advisor/python/sounddevice/functions/sounddevice.PortAudioError
-                    except sd.PortAudioError as err:
+                    except (sd.PortAudioError, ValueError) as err:
                         logger.warning("%s", f"{err}")
             try:
                 while sd.get_stream().active:
@@ -101,6 +116,9 @@ class Voice(QObject):
         logger.debug("Voicing: %s", the_string)
         if sd is None:
             logger.warning("Sounddevice/portaudio not installed.")
+            return
+        if not has_output_device(self.sounddevice):
+            logger.warning("No available output sound device for voice keying.")
             return
         op_path = self.data_path / self.current_op
         if "[" in the_string:
